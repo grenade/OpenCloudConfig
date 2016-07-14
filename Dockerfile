@@ -7,6 +7,7 @@ RUN dnf install -y \
     python \
     util-linux \
     java-1.8.0-openjdk \
+    unzip \
     && dnf clean all
 # aws ec2 cli: http://docs.aws.amazon.com/AWSEC2/latest/CommandLineReference/set-up-ec2-cli-linux.html#setting_up_ec2_command_linux
 RUN curl -O http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip \
