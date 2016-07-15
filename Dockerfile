@@ -8,4 +8,4 @@ RUN dnf install -y \
     python-pip \
     unzip \
     && dnf clean all
-RUN pip install awscli
+RUN pip install --upgrade pip && pip install awscli
