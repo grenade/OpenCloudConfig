@@ -4,6 +4,7 @@ MAINTAINER Rob Thijssen <rthijssen@gmail.com>
 RUN dnf update -y && dnf clean all
 RUN dnf install -y \
     git \
+    jq \
     python \
     python-pip \
     unzip \
