@@ -6,6 +6,7 @@ RUN dnf install -y \
     git \
     gnupg2 \
     jq \
+    pwgen \
     python \
     python-pip \
     unzip \
