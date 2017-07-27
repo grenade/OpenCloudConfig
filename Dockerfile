@@ -9,6 +9,8 @@ RUN dnf install -y \
     git \
     gnupg2 \
     jq \
+    nodejs \
+    npm \
     powershell \
     pwgen \
     python \
@@ -17,3 +19,4 @@ RUN dnf install -y \
     uuid \
     && dnf clean all
 RUN pip install --upgrade pip && pip install awscli
+RUN npm install jsonlint -g
