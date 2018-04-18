@@ -18,5 +18,8 @@ RUN dnf install -y \
     unzip \
     uuid \
     && dnf clean all
-RUN pip install --upgrade pip && pip install awscli
+RUN pip install --upgrade pip
+RUN pip install \
+    awscli \
+    boto
 RUN npm install jsonlint -g
