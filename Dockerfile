@@ -21,5 +21,6 @@ RUN dnf install -y \
 RUN pip install --upgrade pip
 RUN pip install \
     awscli \
-    boto3
+    boto3 \
+    requests
 RUN npm install jsonlint -g
