@@ -22,5 +22,6 @@ RUN pip install --upgrade pip
 RUN pip install \
     awscli \
     boto3 \
-    requests
+    requests \
+    yq
 RUN npm install jsonlint -g
