@@ -1,4 +1,4 @@
-FROM fedora:24
+FROM fedora:33
 MAINTAINER Rob Thijssen <rthijssen@gmail.com>
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc > ./microsoft.asc
@@ -15,6 +15,7 @@ RUN dnf install -y \
     pwgen \
     python \
     python-pip \
+    ruby-devel \
     unzip \
     uuid \
     && dnf clean all
@@ -25,3 +26,4 @@ RUN pip install \
     requests \
     yq
 RUN npm install jsonlint -g
+RUN gem install papertrail
