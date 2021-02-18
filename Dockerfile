@@ -13,6 +13,7 @@ RUN dnf install -y \
     jq \
     nodejs \
     npm \
+    openssl-devel \
     powershell \
     pwgen \
     python \
