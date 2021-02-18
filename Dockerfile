@@ -6,6 +6,7 @@ RUN rpm --import ./microsoft.asc
 RUN rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-prod.rpm
 RUN dnf update -y && dnf clean all
 RUN dnf install -y \
+    cmake \
     git \
     gnupg2 \
     jq \
