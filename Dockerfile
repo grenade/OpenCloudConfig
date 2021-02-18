@@ -7,6 +7,7 @@ RUN rpm -Uvh https://packages.microsoft.com/config/rhel/7/packages-microsoft-pro
 RUN dnf update -y && dnf clean all
 RUN dnf install -y \
     cmake \
+    gcc \
     git \
     gnupg2 \
     jq \
