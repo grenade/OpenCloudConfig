@@ -1,0 +1,16 @@
+os: windows
+language: minimal
+before_script:
+- powershell -executionpolicy bypass -f ci/bootstrap.ps1
+script:
+- powershell -executionpolicy bypass -f ci/set-version.ps1
+deploy:
+  skip_cleanup: true
+  provider: script
+  script: powershell -executionpolicy bypass -f ci/publish.ps1
+  on:
+    branch: master
+    condition: "$TRAVIS_PULL_REQUEST = false"
+env:
+  global:
+    secure: JXadj995zbG4GJc1Sqn9iIIQLRRMjHln+BMDBHqCqHhdytI0b3MOsWd4l5yUEslJ9pmSwoTHK1hBen+1t43zGioU7XoC3yoo0bi/VgdYRuD16KHvzPZOmdB92rt61B1kJhcsJHr/D53Y+xvYblqwAOvAYHqKzQybElNnFGMhE3ayYUiLjKSgXGyd3zlIi3H+A61JW4lxkcrHQs5bt2d6PBsHWJvqCxeSuKAILqSMEjDcXm4DH44fv2pGRIQ6Nh2/ZNwLHjSdFHDCkudb7TChNgtIVzNiAZ0YDy4J93Kh8a6U7YIlQyTSqEXf6wynWiDHhrlCbTEAn+NFJbRxoIjWaKlpJARYwhlStAZ0gfER7/N+w0zdqXK5/OykyqMbPWohSANYXLtsVd7YQLVKdcsDEoGoxpWAwlJ44Iho/ygo/732Sk2f1XNtaUwXbcUvG3p7n1yWPskW5RyH31QxKSLMCE4fPIJvIDsAT5XKCDat2IF2zgGkK1FUELdcc1w1tNnG9WOn8v5385CFCDijKvP0bKVrK6cD8ZLnJqnwMZtJ8KDx6CQ0Z8Al0I4xck0t9tj5XYhBGITM9H2UZk8f9qGUavAwFsF/jv9kVQgzP9Jzy3JqChIL7aFBosAhHTv8ra8yVPRFvukceSph1DR5E0Fg18s/QQd2xqHWP57hwUtcLxo=
