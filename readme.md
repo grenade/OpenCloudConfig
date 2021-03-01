@@ -9,5 +9,6 @@ this repository hosts:
 
 [![travis build status](https://travis-ci.org/grenade/OpenCloudConfig.svg?branch=master)](https://travis-ci.org/grenade/OpenCloudConfig)
 [![powershell gallery](https://img.shields.io/powershellgallery/v/OpenCloudConfig.svg?label=OpenCloudConfig)](https://www.powershellgallery.com/packages/OpenCloudConfig)
-[![powershell gallery](https://img.shields.io/powershellgallery/p/OpenCloudConfig.svg?label=OpenCloudConfig)](https://www.powershellgallery.com/packages/OpenCloudConfig)
+[![powershell gallery](https://img.shields.io/powershellgallery/dt/OpenCloudConfig.svg?label=OpenCloudConfig)](https://www.powershellgallery.com/packages/OpenCloudConfig)
+[![docker version](https://img.shields.io/docker/v/grenade/opencloudconfig.svg?style=plastic)](https://hub.docker.com/r/grenade/opencloudconfig/)
 [![docker pulls](https://img.shields.io/docker/pulls/grenade/opencloudconfig.svg?style=plastic)](https://hub.docker.com/r/grenade/opencloudconfig/)

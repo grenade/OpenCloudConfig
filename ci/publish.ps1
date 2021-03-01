@@ -39,11 +39,14 @@ if ($copyCount -eq $clonedSrcModuleData.FileList.Length) {
     Install-Module -Name $requiredModule.ModuleName -Repository 'PSGallery' -Scope CurrentUser -Verbose;
     Import-Module -Name $requiredModule.ModuleName;
   }
-  Import-Module -Name $module;
-  Get-Module -Name $module;
-  Publish-Module -Name $module -NuGetApiKey $env:NuGetApiKey -Verbose;
-  exit 0
+  if (Import-Module -Name $module -PassThru) {
+    Publish-Module -Name $module -NuGetApiKey $env:NuGetApiKey -Verbose;
+    exit 0
+  } else {
+    Write-Host 'import module failed. module publish skipped';
+    exit 1
+  }
 } else {
-  Write-Host 'module publish skipped';
+  Write-Host 'copy package files failed. module publish skipped';
   exit 1
 }

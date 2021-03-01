@@ -626,8 +626,12 @@ function Invoke-RegistryKeySet {
     }
     if (-not (Get-Item -Path $path -ErrorAction 'SilentlyContinue')) {
       try {
-        New-Item -Path $path -Force
-        Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: registry path: {2} created' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $path)
+        New-Item -Path $path -Force | Out-Null
+        if (Get-Item -Path $path -ErrorAction 'SilentlyContinue') {
+          Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: registry path: {2} created' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $path)
+        } else {
+          Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: failed to create registry path: {2}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $path)
+        }
       } catch {
         Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: failed to create registry path {2}. {3}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $path, $_.Exception.Message)
       }
@@ -693,15 +697,20 @@ function Invoke-RegistryValueSet {
     } else {
       Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'debug' -message ('{0} ({1}) :: registry path: {2} detected' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $path)
     }
-    if (Get-ItemProperty -Path $path -Name $component.ValueName -ErrorAction 'SilentlyContinue') {
-      try {
-        trap [System.UnauthorizedAccessException] {
-          Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: failed to update registry value to: [{2}]{3}{4} for key {5} at path {6}. {7}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path, $_)
+    $itemProperty = (Get-ItemProperty -Path $path -Name $component.ValueName -ErrorAction 'SilentlyContinue')
+    if ($itemProperty) {
+      if ($itemProperty."$component.ValueName" -ne $component.ValueData) {
+        try {
+          trap [System.UnauthorizedAccessException] {
+            Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: failed to update registry value to: [{2}]{3}{4} for key {5} at path {6}. {7}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path, $_)
+          }
+          Set-ItemProperty -Path $path -Name $component.ValueName -Value $component.ValueData -Force
+          Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: registry value updated with value: [{2}]{3}{4} for key {5} at path {6}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path)
+        } catch {
+          Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: failed to update registry value to: [{2}]{3}{4} for key {5} at path {6}. {7}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path, $_.Exception.Message)
         }
-        Set-ItemProperty -Path $path -Name $component.ValueName -Value $component.ValueData -Force
-        Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: registry value updated with value: [{2}]{3}{4} for key {5} at path {6}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path)
-      } catch {
-        Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: failed to update registry value to: [{2}]{3}{4} for key {5} at path {6}. {7}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path, $_.Exception.Message)
+      } else {
+        Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: registry value detected with value: [{2}]{3}{4} for key {5} at path {6}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $component.ValueType, $component.ValueData, $(if ($component.Hex) { '(hex)' } else { '' }), $component.ValueName, $path)
       }
     } else {
       try {
@@ -800,9 +809,9 @@ function Invoke-FirewallRuleSet {
       try {
         if (Get-Command 'New-NetFirewallRule' -ErrorAction 'SilentlyContinue') {
           if ($component.RemoteAddress) {
-            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -LocalPort $component.LocalPort -Direction $component.Direction -Action $component.Action -RemoteAddress $component.RemoteAddress
+            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -LocalPort $component.LocalPort -Direction $component.Direction -Action $component.Action -RemoteAddress $component.RemoteAddress | Out-Null
           } else {
-            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -LocalPort $component.LocalPort -Direction $component.Direction -Action $component.Action
+            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -LocalPort $component.LocalPort -Direction $component.Direction -Action $component.Action | Out-Null
           }
         } else {
           if ($component.RemoteAddress) {
@@ -820,9 +829,9 @@ function Invoke-FirewallRuleSet {
       try {
         if (Get-Command 'New-NetFirewallRule' -ErrorAction 'SilentlyContinue') {
           if ($component.RemoteAddress) {
-            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -IcmpType 8 -Action $component.Action -RemoteAddress $component.RemoteAddress
+            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -IcmpType 8 -Action $component.Action -RemoteAddress $component.RemoteAddress | Out-Null
           } else {
-            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -IcmpType 8 -Action $component.Action
+            New-NetFirewallRule -DisplayName $ruleName -Protocol $component.Protocol -IcmpType 8 -Action $component.Action | Out-Null
           }
         } else {
           if ($component.RemoteAddress) {
@@ -840,9 +849,9 @@ function Invoke-FirewallRuleSet {
       try {
         if (Get-Command 'New-NetFirewallRule' -ErrorAction 'SilentlyContinue') {
           if ($component.RemoteAddress) {
-            New-NetFirewallRule -DisplayName $ruleName -Program $component.Program -Direction $component.Direction -Action $component.Action -RemoteAddress $component.RemoteAddress
+            New-NetFirewallRule -DisplayName $ruleName -Program $component.Program -Direction $component.Direction -Action $component.Action -RemoteAddress $component.RemoteAddress | Out-Null
           } else {
-            New-NetFirewallRule -DisplayName $ruleName -Program $component.Program -Direction $component.Direction -Action $component.Action
+            New-NetFirewallRule -DisplayName $ruleName -Program $component.Program -Direction $component.Direction -Action $component.Action | Out-Null
           }
         } else {
           if ($component.RemoteAddress) {
