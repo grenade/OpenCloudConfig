@@ -730,7 +730,7 @@ function Invoke-DisableIndexing {
     Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'debug' -message ('{0} ({1}) :: begin - {2:o}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, (Get-Date).ToUniversalTime())
   }
   process {
-    $drives = $(if ($component.Drives) { $component.Drives } else { @(Get-WmiObject Win32_Volume -Filter "DriveLetter!=''" | Select-Object -ExpandProperty 'DriveLetter')) })
+    $drives = $(if ($component.Drives) { $component.Drives } else { @(Get-WmiObject Win32_Volume -Filter "DriveLetter!=''" | Select-Object -ExpandProperty 'DriveLetter') })
     foreach ($drive in $drives) {
       if (Get-WmiObject Win32_Volume -Filter "IndexingEnabled=True AND DriveLetter='$drive'") {
         try {
