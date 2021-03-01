@@ -279,8 +279,11 @@ function Confirm-ServiceExistAndStatusMatchOrNotRequested {
         $ss = $_
         $service = (Get-Service -Name $ss.Name -ErrorAction 'SilentlyContinue')
         if ($service) {
-          if ($service.Status -ieq $ss.Status) {
+          if (($ss.Status) -and (($service.Status -ieq $ss.Status) -or ($service.Status -match $ss.Status))) {
             Write-Verbose ('Service: {0}, expected status: {1} matches actual status: {2}' -f $ss.Name, $ss.Status, $service.Status)
+            $true
+          } elseif (-not ($ss.Status)) {
+            Write-Verbose ('Service: {0}, has no expected status and actual status: {1}' -f $ss.Name, $service.Status)
             $true
           } else {
             Write-Verbose ('Service: {0}, expected status: {1} does not match actual status: {2}' -f $ss.Name, $ss.Status, $service.Status)
