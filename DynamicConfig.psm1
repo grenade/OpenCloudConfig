@@ -730,12 +730,22 @@ function Invoke-DisableIndexing {
     Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'debug' -message ('{0} ({1}) :: begin - {2:o}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, (Get-Date).ToUniversalTime())
   }
   process {
-    try {
-      # Disable indexing on all disk volumes.
-      Get-WmiObject Win32_Volume -Filter "IndexingEnabled=$true" | Set-WmiInstance -Arguments @{IndexingEnabled=$false}
-      Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: indexing disabled' -f $($MyInvocation.MyCommand.Name), $component.ComponentName)
-    } catch {
-      Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: failed disable indexing. {2}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $_.Exception.Message)
+    $drives = $(if ($component.Drives) { $component.Drives } else { @(Get-WmiObject Win32_Volume -Filter "DriveLetter!=''" | Select-Object -ExpandProperty 'DriveLetter')) })
+    foreach ($drive in $drives) {
+      if (Get-WmiObject Win32_Volume -Filter "IndexingEnabled=True AND DriveLetter='$drive'") {
+        try {
+          Get-WmiObject Win32_Volume -Filter "IndexingEnabled=True AND DriveLetter='$drive'" | Set-WmiInstance -Arguments @{IndexingEnabled=$false} | Out-Null
+          if (Get-WmiObject Win32_Volume -Filter "IndexingEnabled=False AND DriveLetter='$drive'") {
+            Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: indexing disabled on drive {2}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $drive)
+          } else {
+            Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: failed to disable indexing on drive {2}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $drive)
+          }
+        } catch {
+          Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'error' -message ('{0} ({1}) :: exception on disable indexing for drive {2}. {3}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $drive, $_.Exception.Message)
+        }
+      } else {
+        Write-Log -verbose:$verbose -logName $eventLogName -source $eventLogSource -severity 'info' -message ('{0} ({1}) :: detected indexing disabled on drive {2}' -f $($MyInvocation.MyCommand.Name), $component.ComponentName, $drive)
+      }
     }
   }
   end {
